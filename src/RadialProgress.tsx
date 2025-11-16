@@ -1,4 +1,5 @@
 import React from 'react';
+import { colors } from './colors';
 
 interface RadialProgressProps {
   currentHours: number;
@@ -60,7 +61,7 @@ export default function RadialProgress({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e0e0e0"
+          stroke={colors.progressBackground}
           strokeWidth={strokeWidth}
         />
         {/* Progress circle (only show when fasting) */}
@@ -70,7 +71,7 @@ export default function RadialProgress({
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#000000"
+            stroke={colors.progressActive}
             strokeWidth={strokeWidth}
             strokeDasharray={circumference}
             strokeDashoffset={offset}
@@ -100,7 +101,7 @@ export default function RadialProgress({
             <div style={{
               fontSize: '48px',
               fontWeight: 'bold',
-              color: '#000',
+              color: colors.textPrimary,
               fontFamily: 'monospace',
               lineHeight: 1,
               letterSpacing: '-2px'
@@ -125,7 +126,7 @@ export default function RadialProgress({
                   alignItems: 'center',
                   justifyContent: 'center',
                   padding: 0,
-                  color: '#666',
+                  color: colors.iconSecondary,
                   transition: 'opacity 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
@@ -143,7 +144,7 @@ export default function RadialProgress({
               <div style={{
                 fontSize: '24px',
                 fontWeight: 'bold',
-                color: '#000',
+                color: colors.textPrimary,
                 fontFamily: 'sans-serif',
                 minWidth: '60px',
                 textAlign: 'center'
@@ -161,7 +162,7 @@ export default function RadialProgress({
                   alignItems: 'center',
                   justifyContent: 'center',
                   padding: 0,
-                  color: '#666',
+                  color: colors.iconSecondary,
                   transition: 'opacity 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
@@ -189,7 +190,7 @@ export default function RadialProgress({
                 justifyContent: 'center',
                 padding: 0,
                 marginTop: '0.25rem',
-                color: '#000',
+                color: colors.iconPrimary,
                 transition: 'opacity 0.2s ease'
               }}
               onMouseEnter={(e) => {
@@ -209,7 +210,7 @@ export default function RadialProgress({
           <>
             {/* Ready state */}
             <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
-              <div style={{ fontSize: '20px', color: '#666', fontWeight: '500' }}>Ready to start</div>
+              <div style={{ fontSize: '20px', color: colors.textSecondary, fontWeight: '500' }}>Ready to start</div>
             </div>
 
             {/* Goal selector with left/right buttons */}
@@ -229,7 +230,7 @@ export default function RadialProgress({
                   alignItems: 'center',
                   justifyContent: 'center',
                   padding: 0,
-                  color: '#666',
+                  color: colors.iconSecondary,
                   transition: 'opacity 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
@@ -247,7 +248,7 @@ export default function RadialProgress({
               <div style={{
                 fontSize: '32px',
                 fontWeight: 'bold',
-                color: '#000',
+                color: colors.textPrimary,
                 fontFamily: 'sans-serif',
                 minWidth: '80px',
                 textAlign: 'center'
@@ -265,7 +266,7 @@ export default function RadialProgress({
                   alignItems: 'center',
                   justifyContent: 'center',
                   padding: 0,
-                  color: '#666',
+                  color: colors.iconSecondary,
                   transition: 'opacity 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
@@ -292,7 +293,7 @@ export default function RadialProgress({
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: 0,
-                color: '#000',
+                color: colors.iconPrimary,
                 transition: 'opacity 0.2s ease'
               }}
               onMouseEnter={(e) => {

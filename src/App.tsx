@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { saveFast, getFasts, FastingLog, exportCSV, getGoal, setGoal, saveActiveFast, getActiveFast, clearActiveFast } from './storage';
 import RadialProgress from './RadialProgress';
+import { colors } from './colors';
 
 const GOAL_OPTIONS = [16, 18, 20, 24, 32, 48];
 
@@ -90,12 +91,17 @@ export default function App() {
 
   return (
     <div style={{
-      maxWidth: 500,
-      margin: "2rem auto",
-      fontFamily: "sans-serif",
-      padding: "1rem"
+      minHeight: '100vh',
+      background: colors.background,
+      color: colors.textPrimary,
+      padding: '2rem 1rem',
+      fontFamily: 'sans-serif'
     }}>
-      <h1 style={{ margin: '0 0 2rem 0', textAlign: 'center' }}>Fasting Tracker</h1>
+      <div style={{
+        maxWidth: 500,
+        margin: '0 auto'
+      }}>
+        <h1 style={{ margin: '0 0 2rem 0', textAlign: 'center', color: colors.textPrimary }}>Fasting Tracker</h1>
 
       <div style={{
         display: 'flex',
@@ -114,56 +120,57 @@ export default function App() {
         />
       </div>
 
-      <hr style={{ border: 'none', borderTop: '1px solid #ddd', margin: '2rem 0' }} />
+        <hr style={{ border: 'none', borderTop: `1px solid ${colors.border}`, margin: '2rem 0' }} />
 
-      <div>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1rem'
-        }}>
-          <h2 style={{ margin: 0 }}>History</h2>
-          <button
-            onClick={handleExport}
-            style={{
-              padding: '0.5rem 1rem',
-              background: '#000',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-          >
-            Export CSV
-          </button>
+        <div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1rem'
+          }}>
+            <h2 style={{ margin: 0, color: colors.textPrimary }}>History</h2>
+            <button
+              onClick={handleExport}
+              style={{
+                padding: '0.5rem 1rem',
+                background: colors.buttonPrimary,
+                color: colors.buttonText,
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Export CSV
+            </button>
+          </div>
+          {fasts.length === 0 ? (
+            <p style={{ color: colors.textMuted, fontStyle: 'italic' }}>No fasting history yet</p>
+          ) : (
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {fasts.map((log, idx) => (
+                <li
+                  key={idx}
+                  style={{
+                    padding: '0.75rem',
+                    marginBottom: '0.5rem',
+                    background: colors.surface,
+                    borderRadius: '4px',
+                    borderLeft: `4px solid ${colors.progressActive}`
+                  }}
+                >
+                  <div style={{ fontSize: '14px', color: colors.textSecondary }}>
+                    {new Date(log.start).toLocaleDateString()} • {new Date(log.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} — {new Date(log.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '0.25rem', color: colors.textPrimary }}>
+                    {log.duration} hours
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        {fasts.length === 0 ? (
-          <p style={{ color: '#999', fontStyle: 'italic' }}>No fasting history yet</p>
-        ) : (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {fasts.map((log, idx) => (
-              <li
-                key={idx}
-                style={{
-                  padding: '0.75rem',
-                  marginBottom: '0.5rem',
-                  background: '#f5f5f5',
-                  borderRadius: '4px',
-                  borderLeft: '4px solid #000'
-                }}
-              >
-                <div style={{ fontSize: '14px', color: '#666' }}>
-                  {new Date(log.start).toLocaleDateString()} • {new Date(log.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} — {new Date(log.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '0.25rem' }}>
-                  {log.duration} hours
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

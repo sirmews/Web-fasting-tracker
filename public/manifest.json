@@ -3,7 +3,7 @@
   "short_name": "Fasting",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#fff",
+  "background_color": "#1e1e1e",
   "description": "Track your fasting times offline.",
   "icons": [
     {
@@ -12,5 +12,5 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#2262a3"
+  "theme_color": "#1e1e1e"
 }
