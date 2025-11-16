@@ -4,7 +4,12 @@ export type FastingLog = {
   duration: string;
 };
 
+export type FastingGoal = {
+  hours: number;
+};
+
 const DB_KEY = 'fasting_logs';
+const GOAL_KEY = 'fasting_goal';
 
 async function saveFast(log: FastingLog): Promise<void> {
   let logs = await getFasts();
@@ -28,4 +33,13 @@ function exportCSV(logs: FastingLog[]) {
   window.URL.revokeObjectURL(url);
 }
 
-export { saveFast, getFasts, exportCSV };
+async function getGoal(): Promise<number> {
+  const stored = localStorage.getItem(GOAL_KEY);
+  return stored ? JSON.parse(stored).hours : 16; // Default to 16 hours
+}
+
+async function setGoal(hours: number): Promise<void> {
+  localStorage.setItem(GOAL_KEY, JSON.stringify({ hours }));
+}
+
+export { saveFast, getFasts, exportCSV, getGoal, setGoal };
