@@ -2,20 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { saveFast, getFasts, FastingLog, exportCSV, getGoal, setGoal } from './storage';
 import RadialProgress from './RadialProgress';
 
+const GOAL_OPTIONS = [16, 18, 20, 24, 32, 48];
+
 export default function App() {
   const [fasts, setFasts] = useState<FastingLog[]>([]);
   const [fasting, setFasting] = useState<boolean>(false);
   const [fastStart, setFastStart] = useState<Date | null>(null);
   const [currentHours, setCurrentHours] = useState<number>(0);
   const [goalHours, setGoalHours] = useState<number>(16);
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [tempGoal, setTempGoal] = useState<string>('16');
 
   useEffect(() => {
     getFasts().then(setFasts);
     getGoal().then(goal => {
       setGoalHours(goal);
-      setTempGoal(goal.toString());
     });
   }, []);
 
@@ -59,13 +58,9 @@ export default function App() {
     exportCSV(fasts);
   };
 
-  const handleSaveGoal = async () => {
-    const newGoal = parseFloat(tempGoal);
-    if (newGoal > 0) {
-      await setGoal(newGoal);
-      setGoalHours(newGoal);
-      setShowSettings(false);
-    }
+  const handleGoalChange = async (hours: number) => {
+    await setGoal(hours);
+    setGoalHours(hours);
   };
 
   return (
@@ -75,70 +70,44 @@ export default function App() {
       fontFamily: "sans-serif",
       padding: "1rem"
     }}>
+      <h1 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>Fasting Tracker</h1>
+
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem'
+        justifyContent: 'center',
+        gap: '0.75rem',
+        marginBottom: '2rem',
+        flexWrap: 'wrap'
       }}>
-        <h1 style={{ margin: 0 }}>Fasting Tracker</h1>
-        <button
-          onClick={() => setShowSettings(!showSettings)}
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#000',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          {showSettings ? 'Close' : 'Settings'}
-        </button>
+        {GOAL_OPTIONS.map(hours => (
+          <button
+            key={hours}
+            onClick={() => handleGoalChange(hours)}
+            disabled={fasting}
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              border: goalHours === hours ? '3px solid #000' : '2px solid #ccc',
+              background: goalHours === hours ? '#000' : '#fff',
+              color: goalHours === hours ? '#fff' : '#000',
+              fontSize: '14px',
+              fontWeight: goalHours === hours ? 'bold' : 'normal',
+              cursor: fasting ? 'not-allowed' : 'pointer',
+              opacity: fasting ? 0.5 : 1,
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: 'sans-serif'
+            }}
+          >
+            <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{hours}</div>
+            <div style={{ fontSize: '10px', opacity: 0.8 }}>hrs</div>
+          </button>
+        ))}
       </div>
-
-      {showSettings && (
-        <div style={{
-          padding: '1rem',
-          border: '2px solid #000',
-          borderRadius: '8px',
-          marginBottom: '2rem',
-          background: '#f5f5f5'
-        }}>
-          <h3 style={{ marginTop: 0 }}>Fasting Goal</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <input
-              type="number"
-              value={tempGoal}
-              onChange={(e) => setTempGoal(e.target.value)}
-              style={{
-                padding: '0.5rem',
-                fontSize: '16px',
-                border: '1px solid #333',
-                borderRadius: '4px',
-                width: '100px'
-              }}
-              min="1"
-              step="0.5"
-            />
-            <span>hours</span>
-            <button
-              onClick={handleSaveGoal}
-              style={{
-                padding: '0.5rem 1rem',
-                background: '#000',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      )}
 
       <div style={{
         display: 'flex',
