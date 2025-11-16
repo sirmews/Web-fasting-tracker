@@ -83,7 +83,6 @@ export default function App() {
           <button
             key={hours}
             onClick={() => handleGoalChange(hours)}
-            disabled={fasting}
             style={{
               width: '56px',
               height: '56px',
@@ -93,8 +92,7 @@ export default function App() {
               color: goalHours === hours ? '#fff' : '#000',
               fontSize: '14px',
               fontWeight: goalHours === hours ? 'bold' : 'normal',
-              cursor: fasting ? 'not-allowed' : 'pointer',
-              opacity: fasting ? 0.5 : 1,
+              cursor: 'pointer',
               transition: 'all 0.2s ease',
               display: 'flex',
               flexDirection: 'column',
