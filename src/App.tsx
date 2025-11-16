@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { saveFast, getFasts, FastingLog, exportCSV, getGoal, setGoal } from './storage';
+import { saveFast, getFasts, FastingLog, exportCSV, getGoal, setGoal, saveActiveFast, getActiveFast, clearActiveFast } from './storage';
 import RadialProgress from './RadialProgress';
 
 const GOAL_OPTIONS = [16, 18, 20, 24, 32, 48];
@@ -12,10 +12,27 @@ export default function App() {
   const [goalHours, setGoalHours] = useState<number>(16);
 
   useEffect(() => {
-    getFasts().then(setFasts);
-    getGoal().then(goal => {
-      setGoalHours(goal);
-    });
+    // Load initial data
+    const loadData = async () => {
+      const [fastsData, goalData, activeFastData] = await Promise.all([
+        getFasts(),
+        getGoal(),
+        getActiveFast()
+      ]);
+
+      setFasts(fastsData);
+      setGoalHours(goalData);
+
+      // Restore active fast if it exists
+      if (activeFastData) {
+        const startTime = new Date(activeFastData.startTime);
+        setFastStart(startTime);
+        setFasting(true);
+        setGoalHours(activeFastData.goalHours);
+      }
+    };
+
+    loadData();
   }, []);
 
   // Update current hours every second when fasting
@@ -34,9 +51,11 @@ export default function App() {
     return () => clearInterval(interval);
   }, [fasting, fastStart]);
 
-  const startFast = () => {
+  const startFast = async () => {
+    const startTime = new Date();
     setFasting(true);
-    setFastStart(new Date());
+    setFastStart(startTime);
+    await saveActiveFast(startTime, goalHours);
   };
 
   const endFast = async () => {
@@ -48,6 +67,7 @@ export default function App() {
         duration: ((endDate.getTime() - fastStart.getTime()) / 3600000).toFixed(2)
       };
       await saveFast(newLog);
+      await clearActiveFast();
       setFasts(await getFasts());
       setFasting(false);
       setFastStart(null);
@@ -61,6 +81,11 @@ export default function App() {
   const handleGoalChange = async (hours: number) => {
     await setGoal(hours);
     setGoalHours(hours);
+
+    // Update active fast if currently fasting
+    if (fasting && fastStart) {
+      await saveActiveFast(fastStart, hours);
+    }
   };
 
   return (
