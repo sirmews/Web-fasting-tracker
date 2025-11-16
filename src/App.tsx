@@ -114,62 +114,82 @@ export default function App() {
         marginBottom: '2rem'
       }}>
         {fasting ? (
-          <>
-            <RadialProgress currentHours={currentHours} goalHours={goalHours} />
-            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-              <p style={{ color: '#666', fontSize: '14px', margin: '0 0 1rem 0' }}>
-                Started: {fastStart?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
-              <button
-                onClick={endFast}
-                style={{
-                  padding: '1rem 2rem',
-                  background: '#000',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
-                }}
-              >
-                End Fast
-              </button>
-            </div>
-          </>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <RadialProgress currentHours={currentHours} goalHours={goalHours} onStop={endFast} />
+            <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>
+              Started: {fastStart?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <div style={{
+            position: 'relative',
+            width: '280px',
+            height: '280px'
+          }}>
+            <svg width={280} height={280} style={{ transform: 'rotate(-90deg)' }}>
+              <circle
+                cx={140}
+                cy={140}
+                r={132}
+                fill="none"
+                stroke="#e0e0e0"
+                strokeWidth={16}
+              />
+            </svg>
+
+            {/* Center content */}
             <div style={{
-              width: '280px',
-              height: '280px',
-              borderRadius: '50%',
-              border: '16px solid #e0e0e0',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem'
+              gap: '0.75rem'
             }}>
-              <div style={{ fontSize: '18px', color: '#666' }}>Ready to start</div>
-              <div style={{ fontSize: '14px', color: '#999', marginTop: '0.5rem' }}>
-                Goal: {goalHours}h
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '18px', color: '#666' }}>Ready to start</div>
+                <div style={{ fontSize: '14px', color: '#999', marginTop: '0.25rem' }}>
+                  Goal: {goalHours}h
+                </div>
               </div>
+
+              {/* Start button with play triangle icon */}
+              <button
+                onClick={startFast}
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  border: '2px solid #000',
+                  background: '#000',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  padding: 0,
+                  paddingLeft: '4px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#333';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#000';
+                }}
+              >
+                {/* Play triangle icon */}
+                <div style={{
+                  width: 0,
+                  height: 0,
+                  borderLeft: '16px solid #fff',
+                  borderTop: '10px solid transparent',
+                  borderBottom: '10px solid transparent'
+                }} />
+              </button>
             </div>
-            <button
-              onClick={startFast}
-              style={{
-                padding: '1rem 2rem',
-                background: '#000',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: 'bold'
-              }}
-            >
-              Start Fast
-            </button>
           </div>
         )}
       </div>
