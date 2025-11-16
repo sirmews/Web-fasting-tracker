@@ -95,42 +95,7 @@ export default function App() {
       fontFamily: "sans-serif",
       padding: "1rem"
     }}>
-      <h1 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>Fasting Tracker</h1>
-
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '0.75rem',
-        marginBottom: '2rem',
-        flexWrap: 'wrap'
-      }}>
-        {GOAL_OPTIONS.map(hours => (
-          <button
-            key={hours}
-            onClick={() => handleGoalChange(hours)}
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              border: goalHours === hours ? '3px solid #000' : '2px solid #ccc',
-              background: goalHours === hours ? '#000' : '#fff',
-              color: goalHours === hours ? '#fff' : '#000',
-              fontSize: '14px',
-              fontWeight: goalHours === hours ? 'bold' : 'normal',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'sans-serif'
-            }}
-          >
-            <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{hours}</div>
-            <div style={{ fontSize: '10px', opacity: 0.8 }}>hrs</div>
-          </button>
-        ))}
-      </div>
+      <h1 style={{ margin: '0 0 2rem 0', textAlign: 'center' }}>Fasting Tracker</h1>
 
       <div style={{
         display: 'flex',
@@ -138,85 +103,15 @@ export default function App() {
         alignItems: 'center',
         marginBottom: '2rem'
       }}>
-        {fasting ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-            <RadialProgress currentHours={currentHours} goalHours={goalHours} onStop={endFast} />
-            <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>
-              Started: {fastStart?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </p>
-          </div>
-        ) : (
-          <div style={{
-            position: 'relative',
-            width: '280px',
-            height: '280px'
-          }}>
-            <svg width={280} height={280} style={{ transform: 'rotate(-90deg)' }}>
-              <circle
-                cx={140}
-                cy={140}
-                r={132}
-                fill="none"
-                stroke="#e0e0e0"
-                strokeWidth={16}
-              />
-            </svg>
-
-            {/* Center content */}
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.75rem'
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '18px', color: '#666' }}>Ready to start</div>
-                <div style={{ fontSize: '14px', color: '#999', marginTop: '0.25rem' }}>
-                  Goal: {goalHours}h
-                </div>
-              </div>
-
-              {/* Start button with play triangle icon */}
-              <button
-                onClick={startFast}
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  border: '2px solid #000',
-                  background: '#000',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  padding: 0,
-                  paddingLeft: '4px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#333';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#000';
-                }}
-              >
-                {/* Play triangle icon */}
-                <div style={{
-                  width: 0,
-                  height: 0,
-                  borderLeft: '16px solid #fff',
-                  borderTop: '10px solid transparent',
-                  borderBottom: '10px solid transparent'
-                }} />
-              </button>
-            </div>
-          </div>
-        )}
+        <RadialProgress
+          currentHours={currentHours}
+          goalHours={goalHours}
+          goalOptions={GOAL_OPTIONS}
+          onGoalChange={handleGoalChange}
+          onStart={startFast}
+          onStop={endFast}
+          isFasting={fasting}
+        />
       </div>
 
       <hr style={{ border: 'none', borderTop: '1px solid #ddd', margin: '2rem 0' }} />
