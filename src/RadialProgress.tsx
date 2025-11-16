@@ -28,8 +28,10 @@ export default function RadialProgress({
   const progress = Math.min((currentHours / goalHours) * 100, 100);
   const offset = circumference - (progress / 100) * circumference;
 
-  const hours = Math.floor(currentHours);
-  const remainingMinutes = (currentHours % 1) * 60;
+  // Calculate remaining time (countdown)
+  const remainingHours = Math.max(0, goalHours - currentHours);
+  const hours = Math.floor(remainingHours);
+  const remainingMinutes = (remainingHours % 1) * 60;
   const minutes = Math.floor(remainingMinutes);
   const seconds = Math.floor((remainingMinutes % 1) * 60);
 
