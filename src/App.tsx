@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { saveFast, getFasts, FastingLog, exportCSV, getGoal, setGoal } from './storage';
+import { saveFast, getFasts, FastingLog, exportCSV, getGoal, setGoal, saveActiveFast, getActiveFast, clearActiveFast } from './storage';
 import RadialProgress from './RadialProgress';
+
+const GOAL_OPTIONS = [16, 18, 20, 24, 32, 48];
 
 export default function App() {
   const [fasts, setFasts] = useState<FastingLog[]>([]);
@@ -8,15 +10,29 @@ export default function App() {
   const [fastStart, setFastStart] = useState<Date | null>(null);
   const [currentHours, setCurrentHours] = useState<number>(0);
   const [goalHours, setGoalHours] = useState<number>(16);
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [tempGoal, setTempGoal] = useState<string>('16');
 
   useEffect(() => {
-    getFasts().then(setFasts);
-    getGoal().then(goal => {
-      setGoalHours(goal);
-      setTempGoal(goal.toString());
-    });
+    // Load initial data
+    const loadData = async () => {
+      const [fastsData, goalData, activeFastData] = await Promise.all([
+        getFasts(),
+        getGoal(),
+        getActiveFast()
+      ]);
+
+      setFasts(fastsData);
+      setGoalHours(goalData);
+
+      // Restore active fast if it exists
+      if (activeFastData) {
+        const startTime = new Date(activeFastData.startTime);
+        setFastStart(startTime);
+        setFasting(true);
+        setGoalHours(activeFastData.goalHours);
+      }
+    };
+
+    loadData();
   }, []);
 
   // Update current hours every second when fasting
@@ -35,9 +51,11 @@ export default function App() {
     return () => clearInterval(interval);
   }, [fasting, fastStart]);
 
-  const startFast = () => {
+  const startFast = async () => {
+    const startTime = new Date();
     setFasting(true);
-    setFastStart(new Date());
+    setFastStart(startTime);
+    await saveActiveFast(startTime, goalHours);
   };
 
   const endFast = async () => {
@@ -49,6 +67,7 @@ export default function App() {
         duration: ((endDate.getTime() - fastStart.getTime()) / 3600000).toFixed(2)
       };
       await saveFast(newLog);
+      await clearActiveFast();
       setFasts(await getFasts());
       setFasting(false);
       setFastStart(null);
@@ -59,12 +78,13 @@ export default function App() {
     exportCSV(fasts);
   };
 
-  const handleSaveGoal = async () => {
-    const newGoal = parseFloat(tempGoal);
-    if (newGoal > 0) {
-      await setGoal(newGoal);
-      setGoalHours(newGoal);
-      setShowSettings(false);
+  const handleGoalChange = async (hours: number) => {
+    await setGoal(hours);
+    setGoalHours(hours);
+
+    // Update active fast if currently fasting
+    if (fasting && fastStart) {
+      await saveActiveFast(fastStart, hours);
     }
   };
 
@@ -75,70 +95,42 @@ export default function App() {
       fontFamily: "sans-serif",
       padding: "1rem"
     }}>
+      <h1 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>Fasting Tracker</h1>
+
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem'
+        justifyContent: 'center',
+        gap: '0.75rem',
+        marginBottom: '2rem',
+        flexWrap: 'wrap'
       }}>
-        <h1 style={{ margin: 0 }}>Fasting Tracker</h1>
-        <button
-          onClick={() => setShowSettings(!showSettings)}
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#000',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          {showSettings ? 'Close' : 'Settings'}
-        </button>
+        {GOAL_OPTIONS.map(hours => (
+          <button
+            key={hours}
+            onClick={() => handleGoalChange(hours)}
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              border: goalHours === hours ? '3px solid #000' : '2px solid #ccc',
+              background: goalHours === hours ? '#000' : '#fff',
+              color: goalHours === hours ? '#fff' : '#000',
+              fontSize: '14px',
+              fontWeight: goalHours === hours ? 'bold' : 'normal',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: 'sans-serif'
+            }}
+          >
+            <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{hours}</div>
+            <div style={{ fontSize: '10px', opacity: 0.8 }}>hrs</div>
+          </button>
+        ))}
       </div>
-
-      {showSettings && (
-        <div style={{
-          padding: '1rem',
-          border: '2px solid #000',
-          borderRadius: '8px',
-          marginBottom: '2rem',
-          background: '#f5f5f5'
-        }}>
-          <h3 style={{ marginTop: 0 }}>Fasting Goal</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <input
-              type="number"
-              value={tempGoal}
-              onChange={(e) => setTempGoal(e.target.value)}
-              style={{
-                padding: '0.5rem',
-                fontSize: '16px',
-                border: '1px solid #333',
-                borderRadius: '4px',
-                width: '100px'
-              }}
-              min="1"
-              step="0.5"
-            />
-            <span>hours</span>
-            <button
-              onClick={handleSaveGoal}
-              style={{
-                padding: '0.5rem 1rem',
-                background: '#000',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      )}
 
       <div style={{
         display: 'flex',
@@ -147,62 +139,82 @@ export default function App() {
         marginBottom: '2rem'
       }}>
         {fasting ? (
-          <>
-            <RadialProgress currentHours={currentHours} goalHours={goalHours} />
-            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-              <p style={{ color: '#666', fontSize: '14px', margin: '0 0 1rem 0' }}>
-                Started: {fastStart?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
-              <button
-                onClick={endFast}
-                style={{
-                  padding: '1rem 2rem',
-                  background: '#000',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
-                }}
-              >
-                End Fast
-              </button>
-            </div>
-          </>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <RadialProgress currentHours={currentHours} goalHours={goalHours} onStop={endFast} />
+            <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>
+              Started: {fastStart?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <div style={{
+            position: 'relative',
+            width: '280px',
+            height: '280px'
+          }}>
+            <svg width={280} height={280} style={{ transform: 'rotate(-90deg)' }}>
+              <circle
+                cx={140}
+                cy={140}
+                r={132}
+                fill="none"
+                stroke="#e0e0e0"
+                strokeWidth={16}
+              />
+            </svg>
+
+            {/* Center content */}
             <div style={{
-              width: '280px',
-              height: '280px',
-              borderRadius: '50%',
-              border: '16px solid #e0e0e0',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem'
+              gap: '0.75rem'
             }}>
-              <div style={{ fontSize: '18px', color: '#666' }}>Ready to start</div>
-              <div style={{ fontSize: '14px', color: '#999', marginTop: '0.5rem' }}>
-                Goal: {goalHours}h
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '18px', color: '#666' }}>Ready to start</div>
+                <div style={{ fontSize: '14px', color: '#999', marginTop: '0.25rem' }}>
+                  Goal: {goalHours}h
+                </div>
               </div>
+
+              {/* Start button with play triangle icon */}
+              <button
+                onClick={startFast}
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  border: '2px solid #000',
+                  background: '#000',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  padding: 0,
+                  paddingLeft: '4px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#333';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#000';
+                }}
+              >
+                {/* Play triangle icon */}
+                <div style={{
+                  width: 0,
+                  height: 0,
+                  borderLeft: '16px solid #fff',
+                  borderTop: '10px solid transparent',
+                  borderBottom: '10px solid transparent'
+                }} />
+              </button>
             </div>
-            <button
-              onClick={startFast}
-              style={{
-                padding: '1rem 2rem',
-                background: '#000',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: 'bold'
-              }}
-            >
-              Start Fast
-            </button>
           </div>
         )}
       </div>

@@ -8,8 +8,14 @@ export type FastingGoal = {
   hours: number;
 };
 
+export type ActiveFast = {
+  startTime: string;
+  goalHours: number;
+};
+
 const DB_KEY = 'fasting_logs';
 const GOAL_KEY = 'fasting_goal';
+const ACTIVE_FAST_KEY = 'active_fast';
 
 async function saveFast(log: FastingLog): Promise<void> {
   let logs = await getFasts();
@@ -42,4 +48,21 @@ async function setGoal(hours: number): Promise<void> {
   localStorage.setItem(GOAL_KEY, JSON.stringify({ hours }));
 }
 
-export { saveFast, getFasts, exportCSV, getGoal, setGoal };
+async function saveActiveFast(startTime: Date, goalHours: number): Promise<void> {
+  const activeFast: ActiveFast = {
+    startTime: startTime.toISOString(),
+    goalHours
+  };
+  localStorage.setItem(ACTIVE_FAST_KEY, JSON.stringify(activeFast));
+}
+
+async function getActiveFast(): Promise<ActiveFast | null> {
+  const stored = localStorage.getItem(ACTIVE_FAST_KEY);
+  return stored ? JSON.parse(stored) : null;
+}
+
+async function clearActiveFast(): Promise<void> {
+  localStorage.removeItem(ACTIVE_FAST_KEY);
+}
+
+export { saveFast, getFasts, exportCSV, getGoal, setGoal, saveActiveFast, getActiveFast, clearActiveFast };

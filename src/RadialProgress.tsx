@@ -3,6 +3,7 @@ import React from 'react';
 interface RadialProgressProps {
   currentHours: number;
   goalHours: number;
+  onStop: () => void;
   size?: number;
   strokeWidth?: number;
 }
@@ -10,6 +11,7 @@ interface RadialProgressProps {
 export default function RadialProgress({
   currentHours,
   goalHours,
+  onStop,
   size = 280,
   strokeWidth = 16
 }: RadialProgressProps) {
@@ -19,14 +21,15 @@ export default function RadialProgress({
   const offset = circumference - (progress / 100) * circumference;
 
   const hours = Math.floor(currentHours);
-  const minutes = Math.floor((currentHours % 1) * 60);
+  const remainingMinutes = (currentHours % 1) * 60;
+  const minutes = Math.floor(remainingMinutes);
+  const seconds = Math.floor((remainingMinutes % 1) * 60);
 
   return (
     <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '1rem'
+      position: 'relative',
+      width: size,
+      height: size
     }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
         {/* Background circle */}
@@ -53,53 +56,69 @@ export default function RadialProgress({
             transition: 'stroke-dashoffset 0.5s ease'
           }}
         />
-        {/* Center text */}
-        <text
-          x={size / 2}
-          y={size / 2}
-          textAnchor="middle"
-          dominantBaseline="central"
-          style={{
-            transform: 'rotate(90deg)',
-            transformOrigin: 'center',
-            fontSize: '48px',
-            fontWeight: 'bold',
-            fill: '#000000',
-            fontFamily: 'sans-serif'
-          }}
-        >
-          {hours}:{minutes.toString().padStart(2, '0')}
-        </text>
-        <text
-          x={size / 2}
-          y={size / 2 + 35}
-          textAnchor="middle"
-          dominantBaseline="central"
-          style={{
-            transform: 'rotate(90deg)',
-            transformOrigin: 'center',
-            fontSize: '14px',
-            fill: '#666666',
-            fontFamily: 'sans-serif'
-          }}
-        >
-          of {goalHours}h goal
-        </text>
       </svg>
+
+      {/* Center content */}
       <div style={{
-        fontSize: '18px',
-        color: '#333',
-        fontFamily: 'sans-serif',
-        textAlign: 'center'
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.5rem'
       }}>
-        <div style={{ fontWeight: 'bold' }}>
-          {progress.toFixed(0)}% Complete
+        <div style={{
+          fontSize: '40px',
+          fontWeight: 'bold',
+          color: '#000',
+          fontFamily: 'sans-serif',
+          lineHeight: 1
+        }}>
+          {hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
         </div>
-        {progress >= 100 && (
-          <div style={{ color: '#000', marginTop: '0.5rem', fontWeight: 'bold' }}>
-            Goal Achieved! 🎉
-          </div>
-        )}
+        <div style={{
+          fontSize: '12px',
+          color: '#666',
+          fontFamily: 'sans-serif',
+          marginBottom: '0.5rem'
+        }}>
+          of {goalHours}h goal
+        </div>
+
+        {/* Stop button with square icon */}
+        <button
+          onClick={onStop}
+          style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            border: '2px solid #000',
+            background: '#000',
+            color: '#fff',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s ease',
+            padding: 0
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#333';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#000';
+          }}
+        >
+          {/* Square stop icon */}
+          <div style={{
+            width: '18px',
+            height: '18px',
+            background: '#fff',
+            borderRadius: '2px'
+          }} />
+        </button>
       </div>
     </div>
   );
