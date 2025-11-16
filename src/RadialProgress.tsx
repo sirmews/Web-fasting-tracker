@@ -21,7 +21,9 @@ export default function RadialProgress({
   const offset = circumference - (progress / 100) * circumference;
 
   const hours = Math.floor(currentHours);
-  const minutes = Math.floor((currentHours % 1) * 60);
+  const remainingMinutes = (currentHours % 1) * 60;
+  const minutes = Math.floor(remainingMinutes);
+  const seconds = Math.floor((remainingMinutes % 1) * 60);
 
   return (
     <div style={{
@@ -68,13 +70,13 @@ export default function RadialProgress({
         gap: '0.5rem'
       }}>
         <div style={{
-          fontSize: '48px',
+          fontSize: '40px',
           fontWeight: 'bold',
           color: '#000',
           fontFamily: 'sans-serif',
           lineHeight: 1
         }}>
-          {hours}:{minutes.toString().padStart(2, '0')}
+          {hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
         </div>
         <div style={{
           fontSize: '12px',
