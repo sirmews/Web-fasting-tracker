@@ -1,7 +1,9 @@
-const CACHE_NAME = 'fasting-v1';
+const CACHE_NAME = 'fasting-v2';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/styles.css',
+  '/app.js',
   '/manifest.json'
 ];
 

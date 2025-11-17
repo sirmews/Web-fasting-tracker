@@ -5,14 +5,116 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Fasting Tracker</title>
+    <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div class="container">
+      <h1>Fasting Tracker</h1>
+
+      <div class="radial-container">
+        <!-- Radial Progress -->
+        <div id="radialProgress" class="radial-progress">
+          <svg id="progressSvg" width="360" height="360">
+            <!-- Background circle -->
+            <circle
+              id="bgCircle"
+              cx="180"
+              cy="180"
+              r="172"
+              fill="none"
+              stroke="#e0e0e0"
+              stroke-width="16"
+            />
+            <!-- Progress circle -->
+            <circle
+              id="progressCircle"
+              cx="180"
+              cy="180"
+              r="172"
+              fill="none"
+              stroke="#000000"
+              stroke-width="16"
+              stroke-linecap="round"
+            />
+          </svg>
+
+          <!-- Center content -->
+          <div class="center-content">
+            <!-- Fasting state -->
+            <div id="fastingState" class="state-content" style="display: none;">
+              <div id="timerDisplay" class="timer">00:00:00</div>
+
+              <div class="goal-selector">
+                <button id="prevGoalFasting" class="goal-btn" aria-label="Previous goal">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                <div id="goalDisplayFasting" class="goal-display">16h</div>
+
+                <button id="nextGoalFasting" class="goal-btn" aria-label="Next goal">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              <button id="stopBtn" class="action-btn" aria-label="Stop fasting">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm6-2.438c0-.724.588-1.312 1.313-1.312h4.874c.725 0 1.313.588 1.313 1.313v4.874c0 .725-.588 1.313-1.313 1.313H9.564a1.312 1.312 0 0 1-1.313-1.313V9.564Z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Ready state -->
+            <div id="readyState" class="state-content">
+              <div class="ready-text">Ready to start</div>
+
+              <div class="goal-selector goal-selector-ready">
+                <button id="prevGoalReady" class="goal-btn goal-btn-ready" aria-label="Previous goal">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                <div id="goalDisplayReady" class="goal-display goal-display-ready">16h</div>
+
+                <button id="nextGoalReady" class="goal-btn goal-btn-ready" aria-label="Next goal">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              <button id="startBtn" class="action-btn action-btn-start" aria-label="Start fasting">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="history-section">
+        <div class="history-header">
+          <h2>History</h2>
+          <button id="exportBtn" class="export-btn">Export CSV</button>
+        </div>
+        <ul id="historyList" class="history-list">
+          <li class="empty-state">No fasting history yet</li>
+        </ul>
+      </div>
+    </div>
+
     <script>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("/sw.js");
       }
     </script>
-    <script type="module" src="/src/main.tsx"></script>
+    <script src="/app.js"></script>
   </body>
 </html>

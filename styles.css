@@ -1,0 +1,246 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+h1 {
+  margin: 0 0 2rem 0;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Radial Progress Styles */
+.radial-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.radial-progress {
+  position: relative;
+  width: 360px;
+  height: 360px;
+}
+
+#progressSvg {
+  transform: rotate(-90deg);
+}
+
+#progressCircle {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.center-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Timer Display */
+.timer {
+  font-size: 48px;
+  font-weight: bold;
+  color: #000;
+  font-family: 'Courier New', Courier, monospace;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+/* Ready Text */
+.ready-text {
+  font-size: 20px;
+  color: #666;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Goal Selector */
+.goal-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.goal-selector-ready {
+  margin-bottom: 0.75rem;
+}
+
+.goal-display {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000;
+  min-width: 60px;
+  text-align: center;
+}
+
+.goal-display-ready {
+  font-size: 32px;
+  min-width: 80px;
+}
+
+/* Goal Buttons */
+.goal-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #666;
+  transition: opacity 0.2s ease;
+  width: 32px;
+  height: 32px;
+}
+
+.goal-btn-ready {
+  width: 36px;
+  height: 36px;
+}
+
+.goal-btn:hover {
+  opacity: 0.7;
+}
+
+.goal-btn svg {
+  width: 100%;
+  height: 100%;
+}
+
+#prevGoalFasting svg,
+#prevGoalReady svg {
+  transform: rotate(180deg);
+}
+
+/* Action Buttons */
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #000;
+  transition: opacity 0.2s ease;
+  margin-top: 0.25rem;
+  width: 64px;
+  height: 64px;
+}
+
+.action-btn-start {
+  width: 72px;
+  height: 72px;
+}
+
+.action-btn:hover {
+  opacity: 0.7;
+}
+
+.action-btn svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* History Section */
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 2rem 0;
+}
+
+.history-section {
+  margin-top: 2rem;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.export-btn {
+  padding: 0.5rem 1rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  transition: background 0.2s ease;
+}
+
+.export-btn:hover {
+  background: #333;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-item {
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+  border-left: 4px solid #000;
+}
+
+.history-date {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.history-duration {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 0.25rem;
+}
+
+.empty-state {
+  color: #999;
+  font-style: italic;
+  list-style: none;
+}
