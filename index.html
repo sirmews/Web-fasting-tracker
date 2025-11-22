@@ -480,12 +480,18 @@
       function endFast() {
         if (fastStart) {
           const endDate = new Date();
-          const newLog = {
-            start: fastStart.toISOString(),
-            end: endDate.toISOString(),
-            duration: ((endDate.getTime() - fastStart.getTime()) / 3600000).toFixed(2)
-          };
-          saveFast(newLog);
+          const durationHours = (endDate.getTime() - fastStart.getTime()) / 3600000;
+
+          // Only save fasts that are at least 30 minutes
+          if (durationHours >= 0.5) {
+            const newLog = {
+              start: fastStart.toISOString(),
+              end: endDate.toISOString(),
+              duration: durationHours.toFixed(2)
+            };
+            saveFast(newLog);
+          }
+
           clearActiveFast();
           fasts = getFasts();
 
