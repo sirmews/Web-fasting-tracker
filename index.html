@@ -172,13 +172,18 @@
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: #000;
-        color: #fff;
+        background: #e0e0e0;
+        color: #999;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 12px;
         font-weight: bold;
+      }
+
+      .history-dot.filled {
+        background: #000;
+        color: #fff;
       }
 
       .no-history {
@@ -406,14 +411,43 @@
       }
 
       function renderHistory() {
-        if (fasts.length === 0) {
-          historyContainer.innerHTML = '';
-          return;
+        // Get start of current week (Monday)
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + mondayOffset);
+        monday.setHours(0, 0, 0, 0);
+
+        // Create array for 7 days
+        const weekDays = [];
+        for (let i = 0; i < 7; i++) {
+          const day = new Date(monday);
+          day.setDate(monday.getDate() + i);
+          weekDays.push(day);
         }
 
-        const html = fasts.map(log => {
-          const hours = Math.floor(parseFloat(log.duration));
-          return `<div class="history-dot">${hours}</div>`;
+        // Map fasts to their end dates
+        const fastsByDay = {};
+        fasts.forEach(log => {
+          const endDate = new Date(log.end);
+          const dateKey = endDate.toDateString();
+          // If multiple fasts on same day, use the longest one
+          if (!fastsByDay[dateKey] || parseFloat(log.duration) > parseFloat(fastsByDay[dateKey].duration)) {
+            fastsByDay[dateKey] = log;
+          }
+        });
+
+        // Render 7 dots for the week
+        const html = weekDays.map(day => {
+          const dateKey = day.toDateString();
+          const fast = fastsByDay[dateKey];
+          if (fast) {
+            const hours = Math.floor(parseFloat(fast.duration));
+            return `<div class="history-dot filled">${hours}</div>`;
+          } else {
+            return `<div class="history-dot"></div>`;
+          }
         }).join('');
 
         historyContainer.innerHTML = html;
