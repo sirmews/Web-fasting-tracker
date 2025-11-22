@@ -5,14 +5,566 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Fasting Tracker</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: sans-serif;
+        background: #fff;
+      }
+
+      .container {
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 1rem;
+      }
+
+      h1 {
+        margin: 0 0 2rem 0;
+        text-align: center;
+      }
+
+      .timer-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .radial-container {
+        position: relative;
+        width: 360px;
+        height: 360px;
+      }
+
+      .radial-svg {
+        transform: rotate(-90deg);
+      }
+
+      .progress-circle {
+        transition: stroke-dashoffset 0.5s ease;
+      }
+
+      .center-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+      }
+
+      .time-display {
+        font-size: 48px;
+        font-weight: bold;
+        color: #000;
+        font-family: monospace;
+        line-height: 1;
+        letter-spacing: -2px;
+      }
+
+      .ready-text {
+        font-size: 20px;
+        color: #666;
+        font-weight: 500;
+        text-align: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .goal-selector {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .goal-selector.fasting {
+        margin-bottom: 0.25rem;
+      }
+
+      .goal-display {
+        font-size: 32px;
+        font-weight: bold;
+        color: #000;
+        font-family: sans-serif;
+        min-width: 80px;
+        text-align: center;
+      }
+
+      .goal-display.fasting {
+        font-size: 24px;
+        min-width: 60px;
+      }
+
+      .icon-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        color: #666;
+        transition: opacity 0.2s ease;
+      }
+
+      .icon-btn:hover {
+        opacity: 0.7;
+      }
+
+      .icon-btn.primary {
+        color: #000;
+        margin-top: 0.25rem;
+      }
+
+      .icon-btn.start {
+        margin-top: 0;
+      }
+
+      .nav-icon {
+        width: 36px;
+        height: 36px;
+      }
+
+      .nav-icon.fasting {
+        width: 32px;
+        height: 32px;
+      }
+
+      .play-icon {
+        width: 72px;
+        height: 72px;
+      }
+
+      .stop-icon {
+        width: 64px;
+        height: 64px;
+      }
+
+      hr {
+        border: none;
+        border-top: 1px solid #ddd;
+        margin: 2rem 0;
+      }
+
+      .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .history-header h2 {
+        margin: 0;
+      }
+
+      .export-btn {
+        padding: 0.5rem 1rem;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .export-btn:hover {
+        opacity: 0.8;
+      }
+
+      .no-history {
+        color: #999;
+        font-style: italic;
+      }
+
+      .history-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .history-item {
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background: #f5f5f5;
+        border-radius: 4px;
+        border-left: 4px solid #000;
+      }
+
+      .history-date {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .history-duration {
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 0.25rem;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div class="container">
+      <h1>Fasting Tracker</h1>
+
+      <div class="timer-container">
+        <div class="radial-container">
+          <svg class="radial-svg" width="360" height="360">
+            <!-- Background circle -->
+            <circle
+              cx="180"
+              cy="180"
+              r="172"
+              fill="none"
+              stroke="#e0e0e0"
+              stroke-width="16"
+            />
+            <!-- Progress circle -->
+            <circle
+              id="progress-circle"
+              cx="180"
+              cy="180"
+              r="172"
+              fill="none"
+              stroke="#000000"
+              stroke-width="16"
+              stroke-dasharray="1080.53"
+              stroke-dashoffset="1080.53"
+              stroke-linecap="round"
+              class="progress-circle"
+              style="display: none;"
+            />
+          </svg>
+
+          <div class="center-content">
+            <!-- Ready state -->
+            <div id="ready-state">
+              <div class="ready-text">Ready to start</div>
+
+              <div class="goal-selector">
+                <button class="icon-btn" onclick="handlePreviousGoal()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon" style="transform: rotate(180deg)">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                <div id="goal-display-ready" class="goal-display">16h</div>
+
+                <button class="icon-btn" onclick="handleNextGoal()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              <button class="icon-btn start" onclick="startFast()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="play-icon">
+                  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Fasting state -->
+            <div id="fasting-state" style="display: none;">
+              <div id="time-display" class="time-display">0:00:00</div>
+
+              <div class="goal-selector fasting">
+                <button class="icon-btn" onclick="handlePreviousGoal()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon fasting" style="transform: rotate(180deg)">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                <div id="goal-display-fasting" class="goal-display fasting">16h</div>
+
+                <button class="icon-btn" onclick="handleNextGoal()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon fasting">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              <button class="icon-btn primary" onclick="endFast()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="stop-icon">
+                  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm6-2.438c0-.724.588-1.312 1.313-1.312h4.874c.725 0 1.313.588 1.313 1.313v4.874c0 .725-.588 1.313-1.313 1.313H9.564a1.312 1.312 0 0 1-1.313-1.313V9.564Z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <div>
+        <div class="history-header">
+          <h2>History</h2>
+          <button class="export-btn" onclick="handleExport()">Export CSV</button>
+        </div>
+        <div id="history-container">
+          <p class="no-history">No fasting history yet</p>
+        </div>
+      </div>
+    </div>
+
     <script>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("/sw.js");
       }
     </script>
-    <script type="module" src="/src/main.tsx"></script>
+
+    <script>
+      // Constants
+      const GOAL_OPTIONS = [16, 18, 20, 24, 32, 48];
+      const DB_KEY = 'fasting_logs';
+      const GOAL_KEY = 'fasting_goal';
+      const ACTIVE_FAST_KEY = 'active_fast';
+
+      // State
+      let fasts = [];
+      let isFasting = false;
+      let fastStart = null;
+      let currentHours = 0;
+      let goalHours = 16;
+      let updateInterval = null;
+
+      // SVG calculations
+      const size = 360;
+      const strokeWidth = 16;
+      const radius = (size - strokeWidth) / 2;
+      const circumference = 2 * Math.PI * radius;
+
+      // DOM elements
+      const progressCircle = document.getElementById('progress-circle');
+      const readyState = document.getElementById('ready-state');
+      const fastingState = document.getElementById('fasting-state');
+      const timeDisplay = document.getElementById('time-display');
+      const goalDisplayReady = document.getElementById('goal-display-ready');
+      const goalDisplayFasting = document.getElementById('goal-display-fasting');
+      const historyContainer = document.getElementById('history-container');
+
+      // Storage functions
+      function getFasts() {
+        return JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+      }
+
+      function saveFast(log) {
+        const logs = getFasts();
+        logs.push(log);
+        localStorage.setItem(DB_KEY, JSON.stringify(logs));
+      }
+
+      function getGoal() {
+        const stored = localStorage.getItem(GOAL_KEY);
+        return stored ? JSON.parse(stored).hours : 16;
+      }
+
+      function setGoalStorage(hours) {
+        localStorage.setItem(GOAL_KEY, JSON.stringify({ hours }));
+      }
+
+      function saveActiveFast(startTime, goalHrs) {
+        const activeFast = {
+          startTime: startTime.toISOString(),
+          goalHours: goalHrs
+        };
+        localStorage.setItem(ACTIVE_FAST_KEY, JSON.stringify(activeFast));
+      }
+
+      function getActiveFast() {
+        const stored = localStorage.getItem(ACTIVE_FAST_KEY);
+        return stored ? JSON.parse(stored) : null;
+      }
+
+      function clearActiveFast() {
+        localStorage.removeItem(ACTIVE_FAST_KEY);
+      }
+
+      function exportCSV(logs) {
+        const header = "Start,End,Duration(hours)\n";
+        const body = logs.map(l => `${l.start},${l.end},${l.duration}`).join('\n');
+        const blob = new Blob([header + body], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "fasting_history.csv";
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      // UI update functions
+      function updateProgressCircle() {
+        const progress = Math.min((currentHours / goalHours) * 100, 100);
+        const offset = circumference - (progress / 100) * circumference;
+        progressCircle.setAttribute('stroke-dashoffset', offset);
+      }
+
+      function updateTimeDisplay() {
+        const remainingHours = Math.max(0, goalHours - currentHours);
+        const hours = Math.floor(remainingHours);
+        const remainingMinutes = (remainingHours % 1) * 60;
+        const minutes = Math.floor(remainingMinutes);
+        const seconds = Math.floor((remainingMinutes % 1) * 60);
+
+        timeDisplay.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+
+      function updateGoalDisplay() {
+        goalDisplayReady.textContent = `${goalHours}h`;
+        goalDisplayFasting.textContent = `${goalHours}h`;
+      }
+
+      function updateUI() {
+        if (isFasting) {
+          readyState.style.display = 'none';
+          fastingState.style.display = 'flex';
+          fastingState.style.flexDirection = 'column';
+          fastingState.style.alignItems = 'center';
+          progressCircle.style.display = 'block';
+          updateProgressCircle();
+          updateTimeDisplay();
+        } else {
+          readyState.style.display = 'flex';
+          readyState.style.flexDirection = 'column';
+          readyState.style.alignItems = 'center';
+          fastingState.style.display = 'none';
+          progressCircle.style.display = 'none';
+        }
+        updateGoalDisplay();
+      }
+
+      function renderHistory() {
+        if (fasts.length === 0) {
+          historyContainer.innerHTML = '<p class="no-history">No fasting history yet</p>';
+          return;
+        }
+
+        const html = '<ul class="history-list">' + fasts.map(log => `
+          <li class="history-item">
+            <div class="history-date">
+              ${new Date(log.start).toLocaleDateString()} •
+              ${new Date(log.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} —
+              ${new Date(log.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+            <div class="history-duration">${log.duration} hours</div>
+          </li>
+        `).join('') + '</ul>';
+
+        historyContainer.innerHTML = html;
+      }
+
+      // Action functions
+      function startFast() {
+        const startTime = new Date();
+        isFasting = true;
+        fastStart = startTime;
+        currentHours = 0;
+        saveActiveFast(startTime, goalHours);
+
+        updateInterval = setInterval(() => {
+          const now = new Date();
+          currentHours = (now.getTime() - fastStart.getTime()) / 3600000;
+          updateProgressCircle();
+          updateTimeDisplay();
+        }, 1000);
+
+        updateUI();
+      }
+
+      function endFast() {
+        if (fastStart) {
+          const endDate = new Date();
+          const newLog = {
+            start: fastStart.toISOString(),
+            end: endDate.toISOString(),
+            duration: ((endDate.getTime() - fastStart.getTime()) / 3600000).toFixed(2)
+          };
+          saveFast(newLog);
+          clearActiveFast();
+          fasts = getFasts();
+
+          if (updateInterval) {
+            clearInterval(updateInterval);
+            updateInterval = null;
+          }
+
+          isFasting = false;
+          fastStart = null;
+          currentHours = 0;
+
+          updateUI();
+          renderHistory();
+        }
+      }
+
+      function handlePreviousGoal() {
+        const currentIndex = GOAL_OPTIONS.indexOf(goalHours);
+        const previousIndex = currentIndex > 0 ? currentIndex - 1 : GOAL_OPTIONS.length - 1;
+        goalHours = GOAL_OPTIONS[previousIndex];
+        setGoalStorage(goalHours);
+
+        if (isFasting && fastStart) {
+          saveActiveFast(fastStart, goalHours);
+        }
+
+        updateUI();
+      }
+
+      function handleNextGoal() {
+        const currentIndex = GOAL_OPTIONS.indexOf(goalHours);
+        const nextIndex = currentIndex < GOAL_OPTIONS.length - 1 ? currentIndex + 1 : 0;
+        goalHours = GOAL_OPTIONS[nextIndex];
+        setGoalStorage(goalHours);
+
+        if (isFasting && fastStart) {
+          saveActiveFast(fastStart, goalHours);
+        }
+
+        updateUI();
+      }
+
+      function handleExport() {
+        exportCSV(fasts);
+      }
+
+      // Initialize
+      function init() {
+        // Load saved data
+        fasts = getFasts();
+        goalHours = getGoal();
+
+        // Restore active fast if exists
+        const activeFast = getActiveFast();
+        if (activeFast) {
+          fastStart = new Date(activeFast.startTime);
+          isFasting = true;
+          goalHours = activeFast.goalHours;
+
+          // Start the update interval
+          updateInterval = setInterval(() => {
+            const now = new Date();
+            currentHours = (now.getTime() - fastStart.getTime()) / 3600000;
+            updateProgressCircle();
+            updateTimeDisplay();
+          }, 1000);
+
+          // Initial update
+          const now = new Date();
+          currentHours = (now.getTime() - fastStart.getTime()) / 3600000;
+        }
+
+        updateUI();
+        renderHistory();
+      }
+
+      // Run on load
+      init();
+    </script>
   </body>
 </html>
