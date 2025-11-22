@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="manifest" href="/manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Fasting Tracker</title>
+    <title>Wellness Tracker</title>
     <style>
       * {
         box-sizing: border-box;
@@ -17,6 +17,41 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
+      }
+
+      .tab-container {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        padding: 1rem 1rem 0 1rem;
+      }
+
+      .tab-btn {
+        background: #e0e0e0;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #666;
+      }
+
+      .tab-btn:first-child {
+        border-radius: 8px 0 0 8px;
+      }
+
+      .tab-btn:last-child {
+        border-radius: 0 8px 8px 0;
+      }
+
+      .tab-btn.active {
+        background: #000;
+        color: #fff;
+      }
+
+      .tab-btn:not(.active):hover {
+        background: #d0d0d0;
       }
 
       .container {
@@ -91,7 +126,7 @@
         margin-bottom: 0.75rem;
       }
 
-      .goal-selector.fasting {
+      .goal-selector.active {
         margin-bottom: 0.25rem;
       }
 
@@ -104,7 +139,7 @@
         text-align: center;
       }
 
-      .goal-display.fasting {
+      .goal-display.active {
         font-size: 24px;
         min-width: 60px;
       }
@@ -139,7 +174,7 @@
         height: 36px;
       }
 
-      .nav-icon.fasting {
+      .nav-icon.active {
         width: 32px;
         height: 32px;
       }
@@ -190,92 +225,193 @@
         color: #ccc;
         font-size: 12px;
       }
+
+      .tracker-view {
+        display: none;
+      }
+
+      .tracker-view.active {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+      }
     </style>
   </head>
   <body>
+    <div class="tab-container">
+      <button id="fasting-tab" class="tab-btn active" onclick="switchTab('fasting')">Fasting</button>
+      <button id="meditation-tab" class="tab-btn" onclick="switchTab('meditation')">Meditation</button>
+    </div>
+
     <div class="container">
-      <div class="timer-container">
-        <div class="radial-container">
-          <svg class="radial-svg" width="360" height="360">
-            <!-- Background circle -->
-            <circle
-              cx="180"
-              cy="180"
-              r="172"
-              fill="none"
-              stroke="#e0e0e0"
-              stroke-width="16"
-            />
-            <!-- Progress circle -->
-            <circle
-              id="progress-circle"
-              cx="180"
-              cy="180"
-              r="172"
-              fill="none"
-              stroke="#000000"
-              stroke-width="16"
-              stroke-dasharray="1080.53"
-              stroke-dashoffset="1080.53"
-              stroke-linecap="round"
-              class="progress-circle"
-              style="display: none;"
-            />
-          </svg>
+      <!-- Fasting Tracker View -->
+      <div id="fasting-view" class="tracker-view active">
+        <div class="timer-container">
+          <div class="radial-container">
+            <svg class="radial-svg" width="360" height="360">
+              <circle
+                cx="180"
+                cy="180"
+                r="172"
+                fill="none"
+                stroke="#e0e0e0"
+                stroke-width="16"
+              />
+              <circle
+                id="fasting-progress-circle"
+                cx="180"
+                cy="180"
+                r="172"
+                fill="none"
+                stroke="#000000"
+                stroke-width="16"
+                stroke-dasharray="1080.53"
+                stroke-dashoffset="1080.53"
+                stroke-linecap="round"
+                class="progress-circle"
+                style="display: none;"
+              />
+            </svg>
 
-          <div class="center-content">
-            <!-- Ready state -->
-            <div id="ready-state">
-              <div class="ready-text">Ready to start</div>
+            <div class="center-content">
+              <div id="fasting-ready-state">
+                <div class="ready-text">Ready to start</div>
 
-              <div class="goal-selector">
-                <button class="icon-btn" onclick="handlePreviousGoal()">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon" style="transform: rotate(180deg)">
-                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
-                  </svg>
-                </button>
+                <div class="goal-selector">
+                  <button class="icon-btn" onclick="fastingPreviousGoal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon" style="transform: rotate(180deg)">
+                      <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
 
-                <div id="goal-display-ready" class="goal-display">16h</div>
+                  <div id="fasting-goal-display-ready" class="goal-display">16h</div>
 
-                <button class="icon-btn" onclick="handleNextGoal()">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon">
+                  <button class="icon-btn" onclick="fastingNextGoal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon">
+                      <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+
+                <button class="icon-btn start" onclick="startFast()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="play-icon">
                     <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
                   </svg>
                 </button>
               </div>
 
-              <button class="icon-btn start" onclick="startFast()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="play-icon">
-                  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
-                </svg>
-              </button>
+              <div id="fasting-active-state" style="display: none;">
+                <div id="fasting-time-display" class="time-display">0:00:00</div>
+
+                <div class="goal-selector active">
+                  <button class="icon-btn" onclick="fastingPreviousGoal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon active" style="transform: rotate(180deg)">
+                      <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+
+                  <div id="fasting-goal-display-active" class="goal-display active">16h</div>
+
+                  <button class="icon-btn" onclick="fastingNextGoal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon active">
+                      <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+
+                <button class="icon-btn primary" onclick="endFast()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="stop-icon">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm6-2.438c0-.724.588-1.312 1.313-1.312h4.874c.725 0 1.313.588 1.313 1.313v4.874c0 .725-.588 1.313-1.313 1.313H9.564a1.312 1.312 0 0 1-1.313-1.313V9.564Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <!-- Fasting state -->
-            <div id="fasting-state" style="display: none;">
-              <div id="time-display" class="time-display">0:00:00</div>
+      <!-- Meditation Timer View -->
+      <div id="meditation-view" class="tracker-view">
+        <div class="timer-container">
+          <div class="radial-container">
+            <svg class="radial-svg" width="360" height="360">
+              <circle
+                cx="180"
+                cy="180"
+                r="172"
+                fill="none"
+                stroke="#e0e0e0"
+                stroke-width="16"
+              />
+              <circle
+                id="meditation-progress-circle"
+                cx="180"
+                cy="180"
+                r="172"
+                fill="none"
+                stroke="#000000"
+                stroke-width="16"
+                stroke-dasharray="1080.53"
+                stroke-dashoffset="1080.53"
+                stroke-linecap="round"
+                class="progress-circle"
+                style="display: none;"
+              />
+            </svg>
 
-              <div class="goal-selector fasting">
-                <button class="icon-btn" onclick="handlePreviousGoal()">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon fasting" style="transform: rotate(180deg)">
-                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
-                  </svg>
-                </button>
+            <div class="center-content">
+              <div id="meditation-ready-state">
+                <div class="ready-text">Ready to start</div>
 
-                <div id="goal-display-fasting" class="goal-display fasting">16h</div>
+                <div class="goal-selector">
+                  <button class="icon-btn" onclick="meditationPreviousGoal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon" style="transform: rotate(180deg)">
+                      <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
 
-                <button class="icon-btn" onclick="handleNextGoal()">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon fasting">
+                  <div id="meditation-goal-display-ready" class="goal-display">10m</div>
+
+                  <button class="icon-btn" onclick="meditationNextGoal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon">
+                      <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+
+                <button class="icon-btn start" onclick="startMeditation()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="play-icon">
                     <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
                   </svg>
                 </button>
               </div>
 
-              <button class="icon-btn primary" onclick="endFast()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="stop-icon">
-                  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm6-2.438c0-.724.588-1.312 1.313-1.312h4.874c.725 0 1.313.588 1.313 1.313v4.874c0 .725-.588 1.313-1.313 1.313H9.564a1.312 1.312 0 0 1-1.313-1.313V9.564Z" clip-rule="evenodd" />
-                </svg>
-              </button>
+              <div id="meditation-active-state" style="display: none;">
+                <div id="meditation-time-display" class="time-display">0:00</div>
+
+                <div class="goal-selector active">
+                  <button class="icon-btn" onclick="meditationPreviousGoal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon active" style="transform: rotate(180deg)">
+                      <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+
+                  <div id="meditation-goal-display-active" class="goal-display active">10m</div>
+
+                  <button class="icon-btn" onclick="meditationNextGoal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="nav-icon active">
+                      <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+
+                <button class="icon-btn primary" onclick="endMeditation()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="stop-icon">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm6-2.438c0-.724.588-1.312 1.313-1.312h4.874c.725 0 1.313.588 1.313 1.313v4.874c0 .725-.588 1.313-1.313 1.313H9.564a1.312 1.312 0 0 1-1.313-1.313V9.564Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -291,53 +427,75 @@
     </script>
 
     <script>
-      // Constants
-      const GOAL_OPTIONS = [16, 18, 20, 24, 32, 48];
-      const DB_KEY = 'fasting_logs';
-      const GOAL_KEY = 'fasting_goal';
-      const ACTIVE_FAST_KEY = 'active_fast';
+      // Tab switching
+      let currentTab = 'fasting';
 
-      // State
-      let fasts = [];
-      let isFasting = false;
-      let fastStart = null;
-      let currentHours = 0;
-      let goalHours = 16;
-      let updateInterval = null;
+      function switchTab(tab) {
+        currentTab = tab;
 
-      // SVG calculations
+        // Update tab buttons
+        document.getElementById('fasting-tab').classList.toggle('active', tab === 'fasting');
+        document.getElementById('meditation-tab').classList.toggle('active', tab === 'meditation');
+
+        // Update views
+        document.getElementById('fasting-view').classList.toggle('active', tab === 'fasting');
+        document.getElementById('meditation-view').classList.toggle('active', tab === 'meditation');
+
+        // Update history
+        if (tab === 'fasting') {
+          renderFastingHistory();
+        } else {
+          renderMeditationHistory();
+        }
+      }
+
+      // SVG calculations (shared)
       const size = 360;
       const strokeWidth = 16;
       const radius = (size - strokeWidth) / 2;
       const circumference = 2 * Math.PI * radius;
 
-      // DOM elements
-      const progressCircle = document.getElementById('progress-circle');
-      const readyState = document.getElementById('ready-state');
-      const fastingState = document.getElementById('fasting-state');
-      const timeDisplay = document.getElementById('time-display');
-      const goalDisplayReady = document.getElementById('goal-display-ready');
-      const goalDisplayFasting = document.getElementById('goal-display-fasting');
-      const historyContainer = document.getElementById('history-container');
+      // ============================================
+      // FASTING TRACKER
+      // ============================================
+      const FASTING_GOAL_OPTIONS = [16, 18, 20, 24, 32, 48];
+      const FASTING_DB_KEY = 'fasting_logs';
+      const FASTING_GOAL_KEY = 'fasting_goal';
+      const FASTING_ACTIVE_KEY = 'active_fast';
 
-      // Storage functions
+      let fasts = [];
+      let isFasting = false;
+      let fastStart = null;
+      let fastCurrentHours = 0;
+      let fastGoalHours = 16;
+      let fastUpdateInterval = null;
+
+      // Fasting DOM elements
+      const fastingProgressCircle = document.getElementById('fasting-progress-circle');
+      const fastingReadyState = document.getElementById('fasting-ready-state');
+      const fastingActiveState = document.getElementById('fasting-active-state');
+      const fastingTimeDisplay = document.getElementById('fasting-time-display');
+      const fastingGoalDisplayReady = document.getElementById('fasting-goal-display-ready');
+      const fastingGoalDisplayActive = document.getElementById('fasting-goal-display-active');
+
+      // Fasting storage functions
       function getFasts() {
-        return JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+        return JSON.parse(localStorage.getItem(FASTING_DB_KEY) || '[]');
       }
 
       function saveFast(log) {
         const logs = getFasts();
         logs.push(log);
-        localStorage.setItem(DB_KEY, JSON.stringify(logs));
+        localStorage.setItem(FASTING_DB_KEY, JSON.stringify(logs));
       }
 
-      function getGoal() {
-        const stored = localStorage.getItem(GOAL_KEY);
+      function getFastingGoal() {
+        const stored = localStorage.getItem(FASTING_GOAL_KEY);
         return stored ? JSON.parse(stored).hours : 16;
       }
 
-      function setGoalStorage(hours) {
-        localStorage.setItem(GOAL_KEY, JSON.stringify({ hours }));
+      function setFastingGoalStorage(hours) {
+        localStorage.setItem(FASTING_GOAL_KEY, JSON.stringify({ hours }));
       }
 
       function saveActiveFast(startTime, goalHrs) {
@@ -345,73 +503,61 @@
           startTime: startTime.toISOString(),
           goalHours: goalHrs
         };
-        localStorage.setItem(ACTIVE_FAST_KEY, JSON.stringify(activeFast));
+        localStorage.setItem(FASTING_ACTIVE_KEY, JSON.stringify(activeFast));
       }
 
       function getActiveFast() {
-        const stored = localStorage.getItem(ACTIVE_FAST_KEY);
+        const stored = localStorage.getItem(FASTING_ACTIVE_KEY);
         return stored ? JSON.parse(stored) : null;
       }
 
       function clearActiveFast() {
-        localStorage.removeItem(ACTIVE_FAST_KEY);
+        localStorage.removeItem(FASTING_ACTIVE_KEY);
       }
 
-      function exportCSV(logs) {
-        const header = "Start,End,Duration(hours)\n";
-        const body = logs.map(l => `${l.start},${l.end},${l.duration}`).join('\n');
-        const blob = new Blob([header + body], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "fasting_history.csv";
-        a.click();
-        window.URL.revokeObjectURL(url);
-      }
-
-      // UI update functions
-      function updateProgressCircle() {
-        const progress = Math.min((currentHours / goalHours) * 100, 100);
+      // Fasting UI functions
+      function updateFastingProgressCircle() {
+        const progress = Math.min((fastCurrentHours / fastGoalHours) * 100, 100);
         const offset = circumference - (progress / 100) * circumference;
-        progressCircle.setAttribute('stroke-dashoffset', offset);
+        fastingProgressCircle.setAttribute('stroke-dashoffset', offset);
       }
 
-      function updateTimeDisplay() {
-        const remainingHours = Math.max(0, goalHours - currentHours);
+      function updateFastingTimeDisplay() {
+        const remainingHours = Math.max(0, fastGoalHours - fastCurrentHours);
         const hours = Math.floor(remainingHours);
         const remainingMinutes = (remainingHours % 1) * 60;
         const minutes = Math.floor(remainingMinutes);
         const seconds = Math.floor((remainingMinutes % 1) * 60);
 
-        timeDisplay.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        fastingTimeDisplay.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
       }
 
-      function updateGoalDisplay() {
-        goalDisplayReady.textContent = `${goalHours}h`;
-        goalDisplayFasting.textContent = `${goalHours}h`;
+      function updateFastingGoalDisplay() {
+        fastingGoalDisplayReady.textContent = `${fastGoalHours}h`;
+        fastingGoalDisplayActive.textContent = `${fastGoalHours}h`;
       }
 
-      function updateUI() {
+      function updateFastingUI() {
         if (isFasting) {
-          readyState.style.display = 'none';
-          fastingState.style.display = 'flex';
-          fastingState.style.flexDirection = 'column';
-          fastingState.style.alignItems = 'center';
-          progressCircle.style.display = 'block';
-          updateProgressCircle();
-          updateTimeDisplay();
+          fastingReadyState.style.display = 'none';
+          fastingActiveState.style.display = 'flex';
+          fastingActiveState.style.flexDirection = 'column';
+          fastingActiveState.style.alignItems = 'center';
+          fastingProgressCircle.style.display = 'block';
+          updateFastingProgressCircle();
+          updateFastingTimeDisplay();
         } else {
-          readyState.style.display = 'flex';
-          readyState.style.flexDirection = 'column';
-          readyState.style.alignItems = 'center';
-          fastingState.style.display = 'none';
-          progressCircle.style.display = 'none';
+          fastingReadyState.style.display = 'flex';
+          fastingReadyState.style.flexDirection = 'column';
+          fastingReadyState.style.alignItems = 'center';
+          fastingActiveState.style.display = 'none';
+          fastingProgressCircle.style.display = 'none';
         }
-        updateGoalDisplay();
+        updateFastingGoalDisplay();
       }
 
-      function renderHistory() {
-        // Get start of current week (Monday)
+      function renderFastingHistory() {
+        const historyContainer = document.getElementById('history-container');
         const today = new Date();
         const dayOfWeek = today.getDay();
         const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
@@ -419,7 +565,6 @@
         monday.setDate(today.getDate() + mondayOffset);
         monday.setHours(0, 0, 0, 0);
 
-        // Create array for 7 days
         const weekDays = [];
         for (let i = 0; i < 7; i++) {
           const day = new Date(monday);
@@ -427,18 +572,15 @@
           weekDays.push(day);
         }
 
-        // Map fasts to their end dates
         const fastsByDay = {};
         fasts.forEach(log => {
           const endDate = new Date(log.end);
           const dateKey = endDate.toDateString();
-          // If multiple fasts on same day, use the longest one
           if (!fastsByDay[dateKey] || parseFloat(log.duration) > parseFloat(fastsByDay[dateKey].duration)) {
             fastsByDay[dateKey] = log;
           }
         });
 
-        // Render 7 dots for the week
         const html = weekDays.map(day => {
           const dateKey = day.toDateString();
           const fast = fastsByDay[dateKey];
@@ -453,22 +595,22 @@
         historyContainer.innerHTML = html;
       }
 
-      // Action functions
+      // Fasting actions
       function startFast() {
         const startTime = new Date();
         isFasting = true;
         fastStart = startTime;
-        currentHours = 0;
-        saveActiveFast(startTime, goalHours);
+        fastCurrentHours = 0;
+        saveActiveFast(startTime, fastGoalHours);
 
-        updateInterval = setInterval(() => {
+        fastUpdateInterval = setInterval(() => {
           const now = new Date();
-          currentHours = (now.getTime() - fastStart.getTime()) / 3600000;
-          updateProgressCircle();
-          updateTimeDisplay();
+          fastCurrentHours = (now.getTime() - fastStart.getTime()) / 3600000;
+          updateFastingProgressCircle();
+          updateFastingTimeDisplay();
         }, 1000);
 
-        updateUI();
+        updateFastingUI();
       }
 
       function endFast() {
@@ -476,7 +618,6 @@
           const endDate = new Date();
           const durationHours = (endDate.getTime() - fastStart.getTime()) / 3600000;
 
-          // Only save fasts that are at least 30 minutes
           if (durationHours >= 0.5) {
             const newLog = {
               start: fastStart.toISOString(),
@@ -489,82 +630,314 @@
           clearActiveFast();
           fasts = getFasts();
 
-          if (updateInterval) {
-            clearInterval(updateInterval);
-            updateInterval = null;
+          if (fastUpdateInterval) {
+            clearInterval(fastUpdateInterval);
+            fastUpdateInterval = null;
           }
 
           isFasting = false;
           fastStart = null;
-          currentHours = 0;
+          fastCurrentHours = 0;
 
-          updateUI();
-          renderHistory();
+          updateFastingUI();
+          renderFastingHistory();
         }
       }
 
-      function handlePreviousGoal() {
-        const currentIndex = GOAL_OPTIONS.indexOf(goalHours);
-        const previousIndex = currentIndex > 0 ? currentIndex - 1 : GOAL_OPTIONS.length - 1;
-        goalHours = GOAL_OPTIONS[previousIndex];
-        setGoalStorage(goalHours);
+      function fastingPreviousGoal() {
+        const currentIndex = FASTING_GOAL_OPTIONS.indexOf(fastGoalHours);
+        const previousIndex = currentIndex > 0 ? currentIndex - 1 : FASTING_GOAL_OPTIONS.length - 1;
+        fastGoalHours = FASTING_GOAL_OPTIONS[previousIndex];
+        setFastingGoalStorage(fastGoalHours);
 
         if (isFasting && fastStart) {
-          saveActiveFast(fastStart, goalHours);
+          saveActiveFast(fastStart, fastGoalHours);
         }
 
-        updateUI();
+        updateFastingUI();
       }
 
-      function handleNextGoal() {
-        const currentIndex = GOAL_OPTIONS.indexOf(goalHours);
-        const nextIndex = currentIndex < GOAL_OPTIONS.length - 1 ? currentIndex + 1 : 0;
-        goalHours = GOAL_OPTIONS[nextIndex];
-        setGoalStorage(goalHours);
+      function fastingNextGoal() {
+        const currentIndex = FASTING_GOAL_OPTIONS.indexOf(fastGoalHours);
+        const nextIndex = currentIndex < FASTING_GOAL_OPTIONS.length - 1 ? currentIndex + 1 : 0;
+        fastGoalHours = FASTING_GOAL_OPTIONS[nextIndex];
+        setFastingGoalStorage(fastGoalHours);
 
         if (isFasting && fastStart) {
-          saveActiveFast(fastStart, goalHours);
+          saveActiveFast(fastStart, fastGoalHours);
         }
 
-        updateUI();
+        updateFastingUI();
       }
 
-      function handleExport() {
-        exportCSV(fasts);
+      // ============================================
+      // MEDITATION TIMER
+      // ============================================
+      const MEDITATION_GOAL_OPTIONS = [5, 10, 15, 20, 30, 45];
+      const MEDITATION_DB_KEY = 'meditation_logs';
+      const MEDITATION_GOAL_KEY = 'meditation_goal';
+      const MEDITATION_ACTIVE_KEY = 'active_meditation';
+
+      let sessions = [];
+      let isMeditating = false;
+      let meditationStart = null;
+      let meditationCurrentMinutes = 0;
+      let meditationGoalMinutes = 10;
+      let meditationUpdateInterval = null;
+
+      // Meditation DOM elements
+      const meditationProgressCircle = document.getElementById('meditation-progress-circle');
+      const meditationReadyState = document.getElementById('meditation-ready-state');
+      const meditationActiveState = document.getElementById('meditation-active-state');
+      const meditationTimeDisplay = document.getElementById('meditation-time-display');
+      const meditationGoalDisplayReady = document.getElementById('meditation-goal-display-ready');
+      const meditationGoalDisplayActive = document.getElementById('meditation-goal-display-active');
+
+      // Meditation storage functions
+      function getSessions() {
+        return JSON.parse(localStorage.getItem(MEDITATION_DB_KEY) || '[]');
       }
 
-      // Initialize
+      function saveSession(log) {
+        const logs = getSessions();
+        logs.push(log);
+        localStorage.setItem(MEDITATION_DB_KEY, JSON.stringify(logs));
+      }
+
+      function getMeditationGoal() {
+        const stored = localStorage.getItem(MEDITATION_GOAL_KEY);
+        return stored ? JSON.parse(stored).minutes : 10;
+      }
+
+      function setMeditationGoalStorage(minutes) {
+        localStorage.setItem(MEDITATION_GOAL_KEY, JSON.stringify({ minutes }));
+      }
+
+      function saveActiveSession(startTime, goalMins) {
+        const activeSession = {
+          startTime: startTime.toISOString(),
+          goalMinutes: goalMins
+        };
+        localStorage.setItem(MEDITATION_ACTIVE_KEY, JSON.stringify(activeSession));
+      }
+
+      function getActiveSession() {
+        const stored = localStorage.getItem(MEDITATION_ACTIVE_KEY);
+        return stored ? JSON.parse(stored) : null;
+      }
+
+      function clearActiveSession() {
+        localStorage.removeItem(MEDITATION_ACTIVE_KEY);
+      }
+
+      // Meditation UI functions
+      function updateMeditationProgressCircle() {
+        const progress = Math.min((meditationCurrentMinutes / meditationGoalMinutes) * 100, 100);
+        const offset = circumference - (progress / 100) * circumference;
+        meditationProgressCircle.setAttribute('stroke-dashoffset', offset);
+      }
+
+      function updateMeditationTimeDisplay() {
+        const remainingMinutes = Math.max(0, meditationGoalMinutes - meditationCurrentMinutes);
+        const minutes = Math.floor(remainingMinutes);
+        const seconds = Math.floor((remainingMinutes % 1) * 60);
+
+        meditationTimeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      }
+
+      function updateMeditationGoalDisplay() {
+        meditationGoalDisplayReady.textContent = `${meditationGoalMinutes}m`;
+        meditationGoalDisplayActive.textContent = `${meditationGoalMinutes}m`;
+      }
+
+      function updateMeditationUI() {
+        if (isMeditating) {
+          meditationReadyState.style.display = 'none';
+          meditationActiveState.style.display = 'flex';
+          meditationActiveState.style.flexDirection = 'column';
+          meditationActiveState.style.alignItems = 'center';
+          meditationProgressCircle.style.display = 'block';
+          updateMeditationProgressCircle();
+          updateMeditationTimeDisplay();
+        } else {
+          meditationReadyState.style.display = 'flex';
+          meditationReadyState.style.flexDirection = 'column';
+          meditationReadyState.style.alignItems = 'center';
+          meditationActiveState.style.display = 'none';
+          meditationProgressCircle.style.display = 'none';
+        }
+        updateMeditationGoalDisplay();
+      }
+
+      function renderMeditationHistory() {
+        const historyContainer = document.getElementById('history-container');
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + mondayOffset);
+        monday.setHours(0, 0, 0, 0);
+
+        const weekDays = [];
+        for (let i = 0; i < 7; i++) {
+          const day = new Date(monday);
+          day.setDate(monday.getDate() + i);
+          weekDays.push(day);
+        }
+
+        const sessionsByDay = {};
+        sessions.forEach(log => {
+          const endDate = new Date(log.end);
+          const dateKey = endDate.toDateString();
+          if (!sessionsByDay[dateKey] || parseFloat(log.duration) > parseFloat(sessionsByDay[dateKey].duration)) {
+            sessionsByDay[dateKey] = log;
+          }
+        });
+
+        const html = weekDays.map(day => {
+          const dateKey = day.toDateString();
+          const session = sessionsByDay[dateKey];
+          if (session) {
+            const minutes = Math.floor(parseFloat(session.duration));
+            return `<div class="history-dot filled">${minutes}</div>`;
+          } else {
+            return `<div class="history-dot"></div>`;
+          }
+        }).join('');
+
+        historyContainer.innerHTML = html;
+      }
+
+      // Meditation actions
+      function startMeditation() {
+        const startTime = new Date();
+        isMeditating = true;
+        meditationStart = startTime;
+        meditationCurrentMinutes = 0;
+        saveActiveSession(startTime, meditationGoalMinutes);
+
+        meditationUpdateInterval = setInterval(() => {
+          const now = new Date();
+          meditationCurrentMinutes = (now.getTime() - meditationStart.getTime()) / 60000;
+          updateMeditationProgressCircle();
+          updateMeditationTimeDisplay();
+        }, 1000);
+
+        updateMeditationUI();
+      }
+
+      function endMeditation() {
+        if (meditationStart) {
+          const endDate = new Date();
+          const durationMinutes = (endDate.getTime() - meditationStart.getTime()) / 60000;
+
+          if (durationMinutes >= 1) {
+            const newLog = {
+              start: meditationStart.toISOString(),
+              end: endDate.toISOString(),
+              duration: durationMinutes.toFixed(2)
+            };
+            saveSession(newLog);
+          }
+
+          clearActiveSession();
+          sessions = getSessions();
+
+          if (meditationUpdateInterval) {
+            clearInterval(meditationUpdateInterval);
+            meditationUpdateInterval = null;
+          }
+
+          isMeditating = false;
+          meditationStart = null;
+          meditationCurrentMinutes = 0;
+
+          updateMeditationUI();
+          renderMeditationHistory();
+        }
+      }
+
+      function meditationPreviousGoal() {
+        const currentIndex = MEDITATION_GOAL_OPTIONS.indexOf(meditationGoalMinutes);
+        const previousIndex = currentIndex > 0 ? currentIndex - 1 : MEDITATION_GOAL_OPTIONS.length - 1;
+        meditationGoalMinutes = MEDITATION_GOAL_OPTIONS[previousIndex];
+        setMeditationGoalStorage(meditationGoalMinutes);
+
+        if (isMeditating && meditationStart) {
+          saveActiveSession(meditationStart, meditationGoalMinutes);
+        }
+
+        updateMeditationUI();
+      }
+
+      function meditationNextGoal() {
+        const currentIndex = MEDITATION_GOAL_OPTIONS.indexOf(meditationGoalMinutes);
+        const nextIndex = currentIndex < MEDITATION_GOAL_OPTIONS.length - 1 ? currentIndex + 1 : 0;
+        meditationGoalMinutes = MEDITATION_GOAL_OPTIONS[nextIndex];
+        setMeditationGoalStorage(meditationGoalMinutes);
+
+        if (isMeditating && meditationStart) {
+          saveActiveSession(meditationStart, meditationGoalMinutes);
+        }
+
+        updateMeditationUI();
+      }
+
+      // ============================================
+      // INITIALIZATION
+      // ============================================
       function init() {
-        // Load saved data
+        // Load fasting data
         fasts = getFasts();
-        goalHours = getGoal();
+        fastGoalHours = getFastingGoal();
 
         // Restore active fast if exists
         const activeFast = getActiveFast();
         if (activeFast) {
           fastStart = new Date(activeFast.startTime);
           isFasting = true;
-          goalHours = activeFast.goalHours;
+          fastGoalHours = activeFast.goalHours;
 
-          // Start the update interval
-          updateInterval = setInterval(() => {
+          fastUpdateInterval = setInterval(() => {
             const now = new Date();
-            currentHours = (now.getTime() - fastStart.getTime()) / 3600000;
-            updateProgressCircle();
-            updateTimeDisplay();
+            fastCurrentHours = (now.getTime() - fastStart.getTime()) / 3600000;
+            updateFastingProgressCircle();
+            updateFastingTimeDisplay();
           }, 1000);
 
-          // Initial update
           const now = new Date();
-          currentHours = (now.getTime() - fastStart.getTime()) / 3600000;
+          fastCurrentHours = (now.getTime() - fastStart.getTime()) / 3600000;
         }
 
-        updateUI();
-        renderHistory();
+        // Load meditation data
+        sessions = getSessions();
+        meditationGoalMinutes = getMeditationGoal();
+
+        // Restore active meditation if exists
+        const activeSession = getActiveSession();
+        if (activeSession) {
+          meditationStart = new Date(activeSession.startTime);
+          isMeditating = true;
+          meditationGoalMinutes = activeSession.goalMinutes;
+
+          meditationUpdateInterval = setInterval(() => {
+            const now = new Date();
+            meditationCurrentMinutes = (now.getTime() - meditationStart.getTime()) / 60000;
+            updateMeditationProgressCircle();
+            updateMeditationTimeDisplay();
+          }, 1000);
+
+          const now = new Date();
+          meditationCurrentMinutes = (now.getTime() - meditationStart.getTime()) / 60000;
+        }
+
+        updateFastingUI();
+        updateMeditationUI();
+        renderFastingHistory();
+
+        console.log('Wellness Tracker initialized');
       }
 
-      // Run on load
-      console.log('Fasting Tracker initialized');
       init();
     </script>
   </body>
